@@ -19,7 +19,7 @@ public abstract class SAMActionProposal {
 
 }
 
-public class SendToBackSAMActionProposal {
+public class SendToBackSAMActionProposal implements SAMActionProposal {
   public Figure figure;
 
   public SendToBackSAMActionProposal(Figure figure) {
