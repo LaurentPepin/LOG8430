@@ -18,7 +18,7 @@ import org.jhotdraw.util.ResourceBundleUtil;
 /**
  * SendToBackAction.
  *
- * @author  Werner Randelshofer
+ * @author Werner Randelshofer
  * @version $Id: SendToBackAction.java 717 2010-11-21 12:30:57Z rawcoder $
  */
 public class SendToBackAction extends AbstractSelectedAction {
@@ -28,46 +28,51 @@ public class SendToBackAction extends AbstractSelectedAction {
     /** Creates a new instance. */
     public SendToBackAction(DrawingEditor editor) {
         super(editor);
-        ResourceBundleUtil labels =
-                ResourceBundleUtil.getBundle("org.jhotdraw.draw.Labels");
+        ResourceBundleUtil labels = ResourceBundleUtil.getBundle("org.jhotdraw.draw.Labels");
         labels.configureAction(this, ID);
         updateEnabledState();
     }
 
-    @Override
-    public void actionPerformed(java.awt.event.ActionEvent e) {
-        final DrawingView view = getView();
-        final LinkedList<Figure> figures = new LinkedList<Figure>(view.getSelectedFigures());
-        sendToBack(view, figures);
-        fireUndoableEditHappened(new AbstractUndoableEdit() {
+    /**
+     * Cette section n'est plus nécessaire, car une action selon SAM n'a pas
+     * connaissance du résultat de son exécution, tel qu'expliqué dans le rapport.
+     */
+    // @Override
+    // public void actionPerformed(java.awt.event.ActionEvent e) {
+    // final DrawingView view = getView();
+    // final LinkedList<Figure> figures = new
+    // LinkedList<Figure>(view.getSelectedFigures());
+    // sendToBack(view, figures);
+    // fireUndoableEditHappened(new AbstractUndoableEdit() {
 
-            @Override
-            public String getPresentationName() {
-                ResourceBundleUtil labels =
-                        ResourceBundleUtil.getBundle("org.jhotdraw.draw.Labels");
-                return labels.getTextProperty(ID);
-            }
+    // @Override
+    // public String getPresentationName() {
+    // ResourceBundleUtil labels =
+    // ResourceBundleUtil.getBundle("org.jhotdraw.draw.Labels");
+    // return labels.getTextProperty(ID);
+    // }
 
-            @Override
-            public void redo() throws CannotRedoException {
-                super.redo();
-                SendToBackAction.sendToBack(view, figures);
-            }
+    // @Override
+    // public void redo() throws CannotRedoException {
+    // super.redo();
+    // SendToBackAction.sendToBack(view, figures);
+    // }
 
-            @Override
-            public void undo() throws CannotUndoException {
-                super.undo();
-                BringToFrontAction.bringToFront(view, figures);
-            }
-        });
-    }
+    // @Override
+    // public void undo() throws CannotUndoException {
+    // super.undo();
+    // BringToFrontAction.bringToFront(view, figures);
+    // }
+    // });
+    // }
 
-    public static void sendToBack(DrawingView view, Collection figures) {
+    public static void sendToBack(DrawingView view, Collection figures, State state) {
         Iterator i = figures.iterator();
         Drawing drawing = view.getDrawing();
         while (i.hasNext()) {
             Figure figure = (Figure) i.next();
-            drawing.sendToBack(figure);
+            SendToBackSAMActionProposal prop = new SendToBackSAMActionProposal(figure);
+            drawing.present(prop, state);
         }
     }
 }
