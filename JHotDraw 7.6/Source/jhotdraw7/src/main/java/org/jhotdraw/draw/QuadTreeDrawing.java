@@ -34,12 +34,19 @@ public class QuadTreeDrawing extends AbstractDrawing {
     private boolean needsSorting = false;
 
     public void present(SAMActionProposal prop, State state) {
+        // Valider les paramètres et gestion des erreurs
+
+        // En fonction du type de Proposal donné, exécuter la méthode privée
+        // correspondante.
         switch (prop.getClass()) {
         case "SendToBackSAMActionProposal":
             this.sendToBack(prop.figure);
 
             // Ajouter les autres actions ici, comme bringToFront
         }
+
+        // Si nécessaire, mettre à jour le state representation
+        state(this);
     }
 
     @Override
