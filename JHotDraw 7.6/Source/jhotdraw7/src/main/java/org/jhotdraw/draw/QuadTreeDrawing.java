@@ -10,6 +10,7 @@
  */
 package org.jhotdraw.draw;
 
+import org.jhotdraw.draw.action.SendToBackSAMActionProposal;
 import org.jhotdraw.draw.event.FigureEvent;
 import org.jhotdraw.geom.QuadTree;
 import java.awt.*;
@@ -31,6 +32,15 @@ public class QuadTreeDrawing extends AbstractDrawing {
 
     private QuadTree<Figure> quadTree = new QuadTree<Figure>();
     private boolean needsSorting = false;
+
+    public void present(SAMActionProposal prop, State state) {
+        switch (prop.getClass()) {
+        case "SendToBackSAMActionProposal":
+            this.sendToBack(prop.figure);
+
+            // Ajouter les autres actions ici, comme bringToFront
+        }
+    }
 
     @Override
     public int indexOf(Figure figure) {
@@ -110,8 +120,7 @@ public class QuadTreeDrawing extends AbstractDrawing {
     }
 
     /**
-     * Returns an iterator to iterate in
-     * Z-order front to back over the children.
+     * Returns an iterator to iterate in Z-order front to back over the children.
      */
     @Override
     public java.util.List<Figure> getFiguresFrontToBack() {
@@ -123,20 +132,20 @@ public class QuadTreeDrawing extends AbstractDrawing {
     public Figure findFigure(Point2D.Double p) {
         Collection<Figure> c = quadTree.findContains(p);
         switch (c.size()) {
-            case 0:
-                return null;
-            case 1: {
-                Figure f = c.iterator().next();
-                return (f.contains(p)) ? f : null;
-            }
-            default: {
-                for (Figure f : getFiguresFrontToBack()) {
-                    if (c.contains(f) && f.contains(p)) {
-                        return f;
-                    }
+        case 0:
+            return null;
+        case 1: {
+            Figure f = c.iterator().next();
+            return (f.contains(p)) ? f : null;
+        }
+        default: {
+            for (Figure f : getFiguresFrontToBack()) {
+                if (c.contains(f) && f.contains(p)) {
+                    return f;
                 }
-                return null;
             }
+            return null;
+        }
         }
     }
 
@@ -144,21 +153,21 @@ public class QuadTreeDrawing extends AbstractDrawing {
     public Figure findFigureExcept(Point2D.Double p, Figure ignore) {
         Collection<Figure> c = quadTree.findContains(p);
         switch (c.size()) {
-            case 0: {
-                return null;
-            }
-            case 1: {
-                Figure f = c.iterator().next();
-                return (f == ignore || !f.contains(p)) ? null : f;
-            }
-            default: {
-                for (Figure f : getFiguresFrontToBack()) {
-                    if (f != ignore && f.contains(p)) {
-                        return f;
-                    }
+        case 0: {
+            return null;
+        }
+        case 1: {
+            Figure f = c.iterator().next();
+            return (f == ignore || !f.contains(p)) ? null : f;
+        }
+        default: {
+            for (Figure f : getFiguresFrontToBack()) {
+                if (f != ignore && f.contains(p)) {
+                    return f;
                 }
-                return null;
             }
+            return null;
+        }
         }
     }
 
@@ -166,21 +175,21 @@ public class QuadTreeDrawing extends AbstractDrawing {
     public Figure findFigureExcept(Point2D.Double p, Collection<? extends Figure> ignore) {
         Collection<Figure> c = quadTree.findContains(p);
         switch (c.size()) {
-            case 0: {
-                return null;
-            }
-            case 1: {
-                Figure f = c.iterator().next();
-                return (!ignore.contains(f) || !f.contains(p)) ? null : f;
-            }
-            default: {
-                for (Figure f : getFiguresFrontToBack()) {
-                    if (!ignore.contains(f) && f.contains(p)) {
-                        return f;
-                    }
+        case 0: {
+            return null;
+        }
+        case 1: {
+            Figure f = c.iterator().next();
+            return (!ignore.contains(f) || !f.contains(p)) ? null : f;
+        }
+        default: {
+            for (Figure f : getFiguresFrontToBack()) {
+                if (!ignore.contains(f) && f.contains(p)) {
+                    return f;
                 }
-                return null;
             }
+            return null;
+        }
         }
     }
 
@@ -220,12 +229,12 @@ public class QuadTreeDrawing extends AbstractDrawing {
     public java.util.List<Figure> findFigures(Rectangle2D.Double r) {
         LinkedList<Figure> c = new LinkedList<Figure>(quadTree.findIntersects(r));
         switch (c.size()) {
-            case 0:
+        case 0:
             // fall through
-            case 1:
-                return c;
-            default:
-                return sort(c);
+        case 1:
+            return c;
+        default:
+            return sort(c);
         }
     }
 
@@ -236,7 +245,8 @@ public class QuadTreeDrawing extends AbstractDrawing {
             Rectangle2D.Double r = f.getBounds();
             if (f.get(TRANSFORM) != null) {
                 Rectangle2D rt = f.get(TRANSFORM).createTransformedShape(r).getBounds2D();
-                r = (rt instanceof Rectangle2D.Double) ? (Rectangle2D.Double) rt : new Rectangle2D.Double(rt.getX(), rt.getY(), rt.getWidth(), rt.getHeight());
+                r = (rt instanceof Rectangle2D.Double) ? (Rectangle2D.Double) rt
+                        : new Rectangle2D.Double(rt.getX(), rt.getY(), rt.getWidth(), rt.getHeight());
             }
             if (f.isVisible() && Geom.contains(bounds, r)) {
                 contained.add(f);
@@ -254,8 +264,8 @@ public class QuadTreeDrawing extends AbstractDrawing {
         }
     }
 
-    @Override
-    public void sendToBack(Figure figure) {
+    // Change cette fonction à privé.
+    private void sendToBack(Figure figure) {
         if (children.remove(figure)) {
             children.add(0, figure);
             needsSorting = true;
@@ -317,7 +327,7 @@ public class QuadTreeDrawing extends AbstractDrawing {
 
     @Override
     protected void drawFill(Graphics2D g) {
-        //throw new UnsupportedOperationException("Not supported yet.");
+        // throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
@@ -332,13 +342,10 @@ public class QuadTreeDrawing extends AbstractDrawing {
             Color canvasColor = get(CANVAS_FILL_COLOR);
             Double fillOpacity = get(CANVAS_FILL_OPACITY);
             if (canvasColor != null && fillOpacity > 0) {
-                canvasColor = new Color(
-                        (canvasColor.getRGB() & 0xffffff)
-                        | ((int) (fillOpacity * 255) << 24), true);
+                canvasColor = new Color((canvasColor.getRGB() & 0xffffff) | ((int) (fillOpacity * 255) << 24), true);
 
                 // Fill the canvas
-                Rectangle2D.Double r = new Rectangle2D.Double(
-                        0, 0, get(CANVAS_WIDTH), get(CANVAS_HEIGHT));
+                Rectangle2D.Double r = new Rectangle2D.Double(0, 0, get(CANVAS_WIDTH), get(CANVAS_HEIGHT));
 
                 g.setColor(canvasColor);
                 g.fill(r);
