@@ -33,8 +33,12 @@ public abstract class AbstractDrawing extends AbstractAttributedCompositeFigure 
     private LinkedList<OutputFormat> outputFormats = new LinkedList<OutputFormat>();
     private final static boolean DEBUG = false;
 
+    // Contient la représentation du Model, qui permet d'afficher la Vue
+    public SAMStateRepresentation SAMStateRepresentation;
+
     /** Creates a new instance. */
     public AbstractDrawing() {
+        this.SAMStateRepresentation = new SAMStateRepresentation(this);
     }
 
     @Override
